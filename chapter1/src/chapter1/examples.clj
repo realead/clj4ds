@@ -2,7 +2,8 @@
   (:require [chapter1.data :refer :all]
             [clojure.java.io :as io]
             [incanter.core :as i]
-            [incanter.excel :as xls])
+            [incanter.excel :as xls]
+            [incanter.stats :as s])
 )
 
 (defn ex-1-1
@@ -42,4 +43,32 @@
       (i/$ "Electorate")
       (count)
  )
+)
+
+(defn ex-1-7
+  []
+  (println "average electorate:")
+  (->> (load-data :uk-scrubbed)
+       (i/$ "Electorate")
+       (s/mean)
+  )
+)
+
+(defn ex-1-8
+  []
+  (println "median electorate:")
+  (->> (load-data :uk-scrubbed)
+       (i/$ "Electorate")
+       (s/median)
+  )
+)
+
+
+(defn ex-1-9
+  []
+  (println "standard deviation:")
+  (->> (load-data :uk-scrubbed)
+       (i/$ "Electorate")
+       (s/sd)
+  )
 )

@@ -8,25 +8,23 @@
 
 
 
-
+(def examples [
+                   ex-1-1 
+                   ex-1-3 
+                   ex-1-6 
+                   ex-1-7
+                   ex-1-8
+                   ex-1-9
+              ]
+)
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-
-  (-> (ex-1-1)
-      (str)
-      (println)
+  (doseq  [f examples] 
+      (-> (f)
+          (pr-str)
+          (println)
+      )
   )
-
-  (-> (ex-1-3)
-      (pr-str)
-      (println)
-  )
-
-  (-> (ex-1-6)
-      (pr-str)
-      (println)
-  )
-
 )
