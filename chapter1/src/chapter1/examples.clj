@@ -1,5 +1,6 @@
 (ns chapter1.examples
   (:require [chapter1.data :refer :all]
+            [chapter1.mystats :as ms]
             [clojure.java.io :as io]
             [incanter.core :as i]
             [incanter.excel :as xls]
@@ -70,5 +71,16 @@
   (->> (load-data :uk-scrubbed)
        (i/$ "Electorate")
        (s/sd)
+  )
+)
+
+
+(defn ex-1-10
+  []
+  (println "bin data")
+  (->> (load-data :uk-scrubbed)
+       (i/$ "Electorate")
+       (ms/bin 10)
+       (frequencies)
   )
 )

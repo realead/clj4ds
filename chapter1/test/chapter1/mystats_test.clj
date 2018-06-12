@@ -65,6 +65,12 @@
   )
 )
 
+(deftest test-bin
+  (testing "bin"
+    (is (ms/bin 2 [0 1 2 3]) [0 0 1 1])
+  )
+)
+
 
 
 

@@ -46,3 +46,18 @@
         (nth (sort xs) i)
    )
 )
+
+
+
+(defn bin 
+   [n-bins xs]
+   (let [min-x (apply min xs)
+         max-x (apply max xs)
+         range-x (- max-x min-x)
+         bin-fn (fn [x]
+                   (int (* (/ (- x min-x) range-x) n-bins))
+                )]
+         (map bin-fn xs)
+   )
+)
+
