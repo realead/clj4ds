@@ -4,7 +4,8 @@
             [clojure.java.io :as io]
             [incanter.core :as i]
             [incanter.excel :as xls]
-            [incanter.stats :as s])
+            [incanter.stats :as s]
+            [incanter.charts :as c])
 )
 
 (defn ex-1-1
@@ -75,12 +76,23 @@
 )
 
 
-(defn ex-1-10
+(defn ex-1-11
   []
   (println "bin data")
   (->> (load-data :uk-scrubbed)
        (i/$ "Electorate")
        (ms/bin 10)
        (frequencies)
+  )
+)
+
+
+
+(defn ex-1-14
+  []
+  (println "show histogram")
+  (->  (i/$ "Electorate" (load-data :uk-scrubbed))
+       (c/histogram  :nbins 20)
+       (i/view)
   )
 )
