@@ -5,7 +5,8 @@
             [incanter.core :as i]
             [incanter.excel :as xls]
             [incanter.stats :as s]
-            [incanter.charts :as c])
+            [incanter.charts :as c]
+            [incanter.distributions :as d])
 )
 
 (defn ex-1-1
@@ -123,5 +124,89 @@
                    :nbins 20
       ))
   )
+)
+
+
+
+(defn ex-1-17
+  []
+  (println "plotting normal distribution")
+  (let [dist (d/normal-distribution)
+        xs (->> (repeatedly #(d/draw dist))
+                (take 1000)
+            )]
+      (i/view (c/histogram xs 
+                   :x-label "normal distribution"
+                   :nbins 20
+      ))
+  )
+)
+
+
+(defn honest-baker 
+ [mean sd]
+ (let [dist (d/normal-distribution mean sd)]
+    (repeatedly #(d/draw dist))
+ )
+)
+
+
+(defn ex-1-18
+[]
+  (-> (take 1000 (honest-baker 1000 30))
+      (c/histogram :x-label "Honest baker"
+                   :nbins 25
+      )
+      (i/view)
+  )
+)
+
+
+(defn dishonest-baker 
+ [mean sd]
+ (let [dist (d/normal-distribution mean sd)]
+    (->> (repeatedly #(d/draw dist))
+         (partition 13)
+         (map #(apply max %))
+    )
+ )
+)
+
+
+(defn ex-1-19
+[]
+  (-> (take 1000 (dishonest-baker 1000 30))
+      (c/histogram :x-label "Dishonest baker"
+                   :nbins 25
+      )
+      (i/view)
+  )
+)
+
+
+(defn ex-1-20
+ []
+ (let [ws (take 1000 (honest-baker 950 30))]
+    {:mean (s/mean ws)
+     :median (s/median ws)
+     :skewness (s/skewness ws)
+    }
+  )
+)
+
+;;; Q-Q-plots
+
+(defn ex-1-21
+ []
+ (->> (honest-baker 1000 30)
+      (take 10000)
+      (c/qq-plot)
+      (i/view)
+ )
+ (->> (dishonest-baker 950 30)
+      (take 10000)
+      (c/qq-plot)
+      (i/view)
+ )
 )
 

@@ -61,3 +61,19 @@
    )
 )
 
+
+(defn to_third_power
+    [x]
+    (* x x x)
+)
+
+
+;;; skewness is defined as E((X-E(X)/sigma(X))
+(defn skewness
+ [xs]
+ (let [mu (mean xs)
+       sd (standard-deviation xs)]
+       (mean (map #(to_third_power (/ (- % mu) sd)) xs))
+ )
+)
+

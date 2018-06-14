@@ -73,5 +73,23 @@
 
 
 
+(deftest test-neg-skewness
+  (testing "negative skewness"
+    (is (< (ms/skewness [0 0 1 2 3 3 3 4]) 0.0))
+  )
+)
+
+(deftest test-zero-skewness
+  (testing "no skewness"
+    (is (= (ms/skewness [0 0 1 2 2]) 0.0))
+  )
+)
+
+(deftest test-pos-skewness
+  (testing "positive skewness"
+    (is (> (ms/skewness [0 1 1 1 1 10]) 0.0))
+  )
+)
+
 
 
