@@ -96,3 +96,32 @@
        (i/view)
   )
 )
+
+
+(defn ex-1-15
+  []
+  (println "show uniform distribution")
+  (let [xs (take 1000 (repeatedly rand))]
+      (i/view (c/histogram xs 
+                   :x-label "uniform distribution"
+                   :nbins 20
+      ))
+  )
+)
+
+
+(defn ex-1-16
+  []
+  (println "show central limit theorem")
+  (let [xs (->> (repeatedly rand)
+                (partition 10)
+                (map s/mean)
+                (take 1000)
+            )]
+      (i/view (c/histogram xs 
+                   :x-label "distribution of means"
+                   :nbins 20
+      ))
+  )
+)
+
