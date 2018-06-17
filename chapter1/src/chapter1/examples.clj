@@ -210,3 +210,84 @@
  )
 )
 
+(defn ex-1-22 
+  []
+  (-> (c/box-plot (->> (honest-baker 1000 30)
+                       (take 10000)
+                  )
+                  :legend true
+                  :y-label "Loaf weight (g)"
+                  :series-label "Honest  backer"
+      )
+      (c/add-box-plot (->> (dishonest-baker 950 30)
+                           (take 10000)
+                      )
+                      :series-label "Dishonest baker"
+      )
+      (i/view)
+  )
+)
+
+
+(defn ex-1-23
+ []
+ (let [sample-honest (->>(honest-baker 1000 30)
+                         (take 1000)
+                     )
+       sample-dishonest (->>(dishonest-baker 950 30)
+                            (take 1000)
+                        )
+       ecdf-honest (s/cdf-empirical sample-honest)
+       ecdf-dishonest (s/cdf-empirical sample-dishonest)]
+   (-> (c/xy-plot sample-honest (map ecdf-honest sample-honest)
+                  :x-label "Loaf Weight"
+                  :y-label "Probability"
+                  :legend true
+                  :series-label "Honest baker"
+       )
+       (c/add-lines sample-dishonest
+                    (map ecdf-dishonest sample-dishonest)
+                  :series-label "Dishonest baker"
+       )
+       (i/view)
+    )
+ )
+)
+
+
+(defn ex-1-24
+ []
+ (let [electorate (->>(load-data :uk-scrubbed)
+                     (i/$ "Electorate")
+                  )
+       ecdf (s/cdf-empirical electorate)
+       fitted (s/cdf-normal electorate
+                            :mean (s/mean electorate) 
+                            :sd   (s/sd electorate)
+              )]
+       (-> (c/xy-plot electorate fitted
+                      :x-label "Electorate"
+                      :y-label "Probability"
+                      :series-label "Fitted"
+                      :legend true
+           )
+           (c/add-lines electorate (map ecdf electorate)
+                      :series-label "Empirical"
+           )
+           (i/view)
+       )
+  )
+)
+
+
+(defn ex-1-25
+ []
+ (->> (load-data :uk-scrubbed)
+      (i/$ "Electorate")
+      (c/qq-plot)
+      (i/view)
+ )
+)
+
+
+
