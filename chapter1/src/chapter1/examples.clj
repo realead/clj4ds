@@ -289,5 +289,22 @@
  )
 )
 
+(defn ex-1-27
+ []
+ (->> (load-data :uk-scrubbed)
+      (i/$where #(not-any? number? [ (% "Con") (% "LD")]))
+      (i/$["Region" "Electorate" "Con" "LD"])
+ )
+)
+
+(defn ex-1-28
+ []
+ (->> (load-data :uk-victors)
+      (i/$ :victors-share)
+      (c/qq-plot)
+      (i/view)
+ )
+)
+
 
 
