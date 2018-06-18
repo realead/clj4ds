@@ -28,3 +28,16 @@
   )
 )
 
+(defmethod load-data :ru
+  [_]
+  (i/conj-rows (-> (io/resource "Russia2011_1of2.xls")
+                   (str)
+                   (xls/read-xls)
+               )
+               (-> (io/resource "Russia2011_2of2.xls")
+                   (str)
+                   (xls/read-xls)
+               )
+  )
+)
+

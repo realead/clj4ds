@@ -307,4 +307,12 @@
 )
 
 
+(defn ex-1-29
+ []
+ (-> (load-data :ru)
+     (i/col-names)
+ ) 
+)
+
+
 
