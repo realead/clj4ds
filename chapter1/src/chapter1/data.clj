@@ -41,3 +41,16 @@
   )
 )
 
+
+(defmethod load-data :ru-victors
+  [_]
+  (->> (load-data :ru)
+      (i/rename-cols
+          {"Number of voters included in voters list" :electorate
+           "Number of valid ballots" :valid-ballots
+           "United Russia" :victors}
+      )
+      (i/add-derived-column :victors-share [:victors :valid-ballots] i/safe-div)
+      (i/add-derived-column :turnout [:valid-ballots :electorate] /)
+  )
+)

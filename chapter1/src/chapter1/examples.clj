@@ -314,5 +314,64 @@
  ) 
 )
 
+(defn ex-1-30
+ [ru-data]
+ (-> (i/$ :turnout ru-data)
+     (c/histogram :x-label "Russian turnout"
+                  :nbins 20)
+     (i/view)
+ )
+)
+
+
+(defn ex-1-31
+ [ru-data]
+ (-> (i/$ :turnout ru-data)
+     (c/qq-plot)
+     (i/view)
+ )
+)
+
+(defn as-pmf 
+  [bins]
+  (let [histogram (frequencies bins)
+        total     (reduce + (vals histogram))]
+
+      (->>  histogram 
+           (map (fn [[k v]] [k (/ v total)]))
+           (into {})
+      )
+  )
+)
+
+
+
+(defn ex-1-32 
+  [ru-data]
+  (let [n-bins 40
+        uk-data (->> (load-data :uk-victors)
+                     (i/$ :turnout)
+                     (ms/bin n-bins)
+                     (as-pmf)
+                )
+       ru-data (->> (i/$ :turnout ru-data)
+                    (ms/bin n-bins)
+                    (as-pmf)
+               )
+        ]
+
+       (-> (c/xy-plot (keys uk-data) (vals uk-data)
+                       :series-label "UK"
+                       :legend true
+                       :x-label "Turnout bins"
+                       :y-label "Probability"
+           )
+           (c/add-lines (keys ru-data) (vals ru-data)
+                       :series-label "Russia"
+           )
+           (i/view)
+       )
+  )
+)
 
 
