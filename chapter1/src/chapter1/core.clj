@@ -30,13 +30,15 @@
  ;;;                  ex-1-27
  ;;;                  ex-1-28
  ;;;                  ex-1-29
+                      ex-1-33
               ]
 )
 
 (def examples-with-ru [
-                      ex-1-30
-                      ex-1-31
-                      ex-1-32
+ ;;;                  ex-1-30
+ ;;;                  ex-1-31
+ ;;;                  ex-1-32
+                      ex-1-35
                ]
 )
 
@@ -51,12 +53,14 @@
   )
 
   ;;load ru-data only once:
-  (let [ru-data (load-data :ru-victors)]
-    (doseq  [f examples-with-ru] 
-      (-> (f ru-data)
-          (pr-str)
-          (println)
+  (if (not (empty? examples-with-ru))
+      (let [ru-data (load-data :ru-victors)]
+        (doseq  [f examples-with-ru] 
+          (-> (f ru-data)
+              (pr-str)
+              (println)
+          )
+        )
       )
-    )
-  )
+   )
 )

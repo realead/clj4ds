@@ -375,3 +375,31 @@
 )
 
 
+(defn ex-1-33
+   []
+   (let [data (load-data :uk-victors)]
+     (-> (c/scatter-plot (i/$ :turnout data)
+                         (i/$ :victors-share data)
+                         :x-label "Turnout"
+                         :y-label "Victor's share"
+          )
+          (i/view)
+     )
+   )
+)
+
+
+
+
+(defn ex-1-35
+   [data]
+   (-> (c/scatter-plot (i/$ :turnout data)
+                         (i/$ :victors-share data)
+                         :x-label "Turnout"
+                         :y-label "Victor's share"
+          )
+          (c/set-alpha 0.05)
+          (i/view)
+   )
+)
+
