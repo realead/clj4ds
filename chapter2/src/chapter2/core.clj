@@ -9,7 +9,9 @@
 
 
 (def examples [
-                       ex-2-1 
+ ;                      ex-2-1 
+                       ex-2-2
+                       ex-2-3
               ]
 )
 

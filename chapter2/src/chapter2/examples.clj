@@ -15,3 +15,22 @@
   )
 )
 
+
+
+(defn ex-2-2
+  []
+  (-> (i/$ :dwell-time (load-data "dwell-times.tsv"))
+      (c/histogram :x-label "Dwell time (s)" :nbins 50)
+      (i/view)
+  )
+)
+
+(defn ex-2-3
+  []
+  (-> (i/$ :dwell-time (load-data "dwell-times.tsv"))
+      (c/histogram :x-label "Dwell time (s)" :nbins 50)
+      (c/set-axis :y (c/log-axis :label "Log Frequency"))
+      (i/view)
+  )
+)
+
