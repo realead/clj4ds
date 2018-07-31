@@ -45,3 +45,32 @@
   )
 )
 
+
+(defn ex-2-5
+  []
+  (let  [data (->> (load-data "dwell-times.tsv")
+                   (daily-mean-dwell-times)
+                   (i/$ :dwell-time)
+              )]
+      (println "Mean:" (s/mean data))
+      (println "Median:" (s/median data))
+      (println "SD:" (s/sd data))
+  )
+)
+
+
+
+(defn ex-2-6
+  []
+  (let  [data (->> (load-data "dwell-times.tsv")
+                   (daily-mean-dwell-times)
+                   (i/$ :dwell-time)
+              )]
+      (-> (c/histogram data 
+                   :x-label "Daily mean dwelltime"
+                   :nbins 20)
+           (i/view)
+      )
+  )
+)
+
