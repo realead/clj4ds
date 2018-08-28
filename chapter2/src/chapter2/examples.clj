@@ -5,7 +5,8 @@
             [incanter.excel :as xls]
             [incanter.stats :as s]
             [incanter.charts :as c]
-            [incanter.distributions :as d])
+            [incanter.distributions :as d]
+            [clj-time.format :as f])
 )
 
 (defn ex-2-1
@@ -70,6 +71,40 @@
                    :x-label "Daily mean dwelltime"
                    :nbins 20)
            (i/view)
+      )
+  )
+)
+
+(defn ex-2-7
+  []
+  (let  [data (->> (load-data "dwell-times.tsv")
+                   (daily-mean-dwell-times)
+                   (i/$ :dwell-time)
+              )
+         mean (s/mean data)
+         sd   (s/sd data)
+         pdf  (fn [x] (s/pdf-normal x :mean mean :sd sd))]
+      (-> (c/histogram data 
+                   :x-label "Daily mean dwelltime"
+                   :nbins 20
+                   :density true)
+           (c/add-function pdf 80 100)
+           (i/view)
+      )
+  )
+)
+
+(defn standard-error
+  [data]
+  (/ (s/sd data) (Math/sqrt (count data)))
+)
+
+(defn ex-2-8
+  [data]
+  (let  [may-1 (f/parse-local-date "2015-05-01")]
+      (->> (with-parsed-date data)
+           (filter-days-dwell-times may-1)
+           (standard-error)
       )
   )
 )

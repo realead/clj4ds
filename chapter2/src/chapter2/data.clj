@@ -27,6 +27,13 @@
      (i/$where {:date {:$fn p/weekday?}} data)
 )
 
+(defn filter-days-dwell-times
+  [day data]
+     (->> (i/$where {:date {:$fn #(p/same-date? day %)}} data)
+          (i/$ :dwell-time)
+     )
+)
+
 (defn mean-dwell-times-by-date 
   [data]
   (i/$rollup :mean :dwell-time :date data)

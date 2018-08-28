@@ -13,8 +13,14 @@
  ;                      ex-2-2
  ;                      ex-2-3
  ;                      ex-2-4
-                       ex-2-5
-                       ex-2-6
+ ;                      ex-2-5
+ ;                      ex-2-6
+ ;                     ex-2-7
+              ]
+)
+
+(def examples-with-data [
+                      ex-2-8
               ]
 )
 
@@ -26,6 +32,15 @@
       (-> (f)
           (pr-str)
           (println)
+      )
+  )
+
+  (let [data (load-data "dwell-times.tsv")]
+      (doseq  [f examples-with-data] 
+          (-> (f data)
+              (pr-str)
+              (println)
+          )
       )
   )
 )
