@@ -109,3 +109,26 @@
   )
 )
 
+
+(defn confidence-interval 
+  [p xs]
+  (let [x-bar (s/mean xs)
+        se (standard-error xs)
+        z-crit (s/quantile-normal (- 1 (/ (- 1 p) 2)))]
+     [(- x-bar (* se z-crit))
+      (+ x-bar (* se z-crit))]
+   )
+)
+
+(defn ex-2-9
+  [data]
+  (let  [may-1 (f/parse-local-date "2015-05-01")]
+      (->> (with-parsed-date data)
+           (filter-days-dwell-times may-1)
+           (confidence-interval 0.95)
+      )
+  )
+)
+
+
+

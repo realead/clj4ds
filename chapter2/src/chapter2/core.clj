@@ -21,6 +21,7 @@
 
 (def examples-with-data [
                       ex-2-8
+                      ex-2-9
               ]
 )
 
