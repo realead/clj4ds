@@ -131,4 +131,16 @@
 )
 
 
+(defn ex-2-1011
+  []
+  (let  [times (->> (load-data "campaign-sample.tsv")
+                   (i/$ :dwell-time))]
+      (println "n:    " (count times))
+      (println "Mean: " (s/mean times))
+      (println "Media:" (s/median times))
+      (println "SD:   " (s/sd times))
+      (println "SE:   " (standard-error times))
+      (println "Interval" (confidence-interval 0.95 times))
+  )
+)
 
