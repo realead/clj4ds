@@ -6,7 +6,8 @@
             [incanter.stats :as s]
             [incanter.charts :as c]
             [incanter.distributions :as d]
-            [clj-time.format :as f])
+            [clj-time.format :as f]
+            [clj-time.predicates :as p])
 )
 
 (defn ex-2-1
@@ -144,3 +145,81 @@
   )
 )
 
+(defn ex-2-12
+  [data]
+  (let [means (->> (with-parsed-date data)
+                   (mean-dwell-times-by-date)
+                   (i/$ :dwell-time)
+              )
+       ]
+       (-> (c/histogram means 
+                        :x-label "Daily mean dwell time unfiltered (s)"
+                        :nbins 20
+           )
+           (i/view)
+       )
+    )
+)
+
+
+(defn ex-2-13
+  [data]
+  (let [times (->> (with-parsed-date data)
+                   (i/$where {:date {:$fn p/weekend?}})
+                   (i/$ :dwell-time)
+              )
+       ]
+      (println "n:    " (count times))
+      (println "Mean: " (s/mean times))
+      (println "Media:" (s/median times))
+      (println "SD:   " (s/sd times))
+      (println "SE:   " (standard-error times))
+      (println "Interval" (confidence-interval 0.95 times))
+    )
+)
+
+(defn pooled-standard-error
+  [a b]
+  (i/sqrt (+ (/ (i/sq (s/sd a)) (count a))
+             (/ (i/sq (s/sd b)) (count b))
+          )
+  )
+)
+
+
+(defn z-stat
+  [a b]
+  (-> (- (s/mean a)
+         (s/mean b))
+      (/ (pooled-standard-error a b))
+  )
+)
+
+(defn z-test
+   [a b]
+   (s/cdf-normal (z-stat a b))
+)
+
+(defn map-vals 
+  [f m]
+  (into {} (for [[k v] m] [k (f v)]))
+)
+
+
+(defn ex-2-14
+ []
+ (let [data (->> (load-data "new-site.tsv")
+                 (:rows)
+                 (group-by :site)
+                 (map-vals (partial map :dwell-time))
+            )
+      
+       a (get data 0)
+       b (get data 1)
+      ]
+      (println "a n:" (count a))
+      (println "b n:" (count b))
+      (println "z-stat:" (z-stat a b))
+      (println "p-value" (z-test a b))
+ )
+)

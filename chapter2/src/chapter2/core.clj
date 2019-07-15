@@ -16,13 +16,16 @@
  ;                      ex-2-5
  ;                      ex-2-6
  ;                     ex-2-7
-                        ex-2-1011
+ ;                       ex-2-1011
+                        ex-2-14
               ]
 )
 
 (def examples-with-data [
  ;                     ex-2-8
  ;                     ex-2-9
+ ;                     ex-2-12
+ ;                     ex-2-13
               ]
 )
 
