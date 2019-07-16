@@ -364,5 +364,28 @@
  )
 )
 
+;bonferroni correcction
+(defn ex-2-23
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv") 
+       alpha (/ 0.05 (count data))]
+       (doseq [[site-a times-a] data
+               [site-b times-b] data
+               :when (> site-a site-b)
+               :let [p-val (-> (s/t-test times-a :y times-b)
+                                (:p-value)
+                            )
+                     ]
+              ]
+              (when (< p-val alpha)
+                 (println site-b "and" site-a
+                          "are significantly different:"
+                          (format "%.3f" p-val)
+                  )
+              )
+       )
+ )
+)
+
 
 
