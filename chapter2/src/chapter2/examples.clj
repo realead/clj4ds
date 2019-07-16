@@ -7,7 +7,8 @@
             [incanter.charts :as c]
             [incanter.distributions :as d]
             [clj-time.format :as f]
-            [clj-time.predicates :as p])
+            [clj-time.predicates :as p]
+  )
 )
 
 (defn ex-2-1
@@ -206,14 +207,19 @@
 )
 
 
+(defn load_new_site_data
+   []
+   (->> (load-data "new-site.tsv")
+         (:rows)
+         (group-by :site)
+         (map-vals (partial map :dwell-time))
+   )
+)
+
+
 (defn ex-2-14
  []
- (let [data (->> (load-data "new-site.tsv")
-                 (:rows)
-                 (group-by :site)
-                 (map-vals (partial map :dwell-time))
-            )
-      
+ (let [data (load_new_site_data)
        a (get data 0)
        b (get data 1)
       ]
@@ -223,3 +229,64 @@
       (println "p-value" (z-test a b))
  )
 )
+
+(defn pooled-standard-error-for-t-stat
+  [a b]
+  (i/sqrt (+ (i/sq (standard-error a))
+             (i/sq (standard-error b))
+          )
+  )
+)
+
+(defn t-stat
+  [a b]
+  (-> (- (s/mean a)
+         (s/mean b))
+      (/ (pooled-standard-error-for-t-stat a b))
+  )
+)
+
+
+(defn t-test
+  [a b]
+  (let [df (+ (count a) (count b) -2)]
+     (- 1 (s/cdf-t (i/abs (t-stat a b )) :df df))
+  )
+)
+
+
+(defn ex-2-1516
+ []
+ (let [data (load_new_site_data)
+       a (get data 0)
+       b (get data 1)
+      ]
+      (println "a n:" (count a))
+      (println "b n:" (count b))
+      (println "t-stat:" (t-stat a b))
+      (println "t-test:" (t-test a b))
+ )
+)
+
+
+
+(defn ex-2-17
+ []
+ (let [data (load_new_site_data)
+       a (get data 0)
+       b (get data 1)
+      ]
+      (clojure.pprint/pprint (s/t-test a :y b :alternative :lower))
+ )
+)
+
+
+(defn ex-2-18
+ []
+ (let [data (load_new_site_data)
+       b (get data 1)
+      ]
+      (clojure.pprint/pprint (s/t-test b :mu 90))
+ )
+)
+
