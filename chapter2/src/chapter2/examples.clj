@@ -206,14 +206,18 @@
   (into {} (for [[k v] m] [k (f v)]))
 )
 
-
-(defn load_new_site_data
-   []
-   (->> (load-data "new-site.tsv")
+(defn load-and-group-data
+   [filename]
+   (->> (load-data filename)
          (:rows)
          (group-by :site)
          (map-vals (partial map :dwell-time))
    )
+)
+
+(defn load_new_site_data
+   []
+   (load-and-group-data "new-site.tsv")
 )
 
 
@@ -305,4 +309,60 @@
       )
  )
 )
+
+
+
+(defn ex-2-20
+ []
+ (->>  (i/transform-col (load-data "multiple-sites.tsv") :dwell-time float)
+       (i/$rollup :mean :dwell-time :site)
+       (i/$order :dwell-time :desc)
+       (i/view)
+ )
+)
+
+
+(defn ex-2-21
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv") 
+       alpha 0.05]
+       (doseq [[site-a times-a] data
+               [site-b times-b] data
+               :when (> site-a site-b)
+               :let [p-val (-> (s/t-test times-a :y times-b)
+                                (:p-value)
+                            )
+                     ]
+              ]
+              (when (< p-val alpha)
+                 (println site-b "and" site-a
+                          "are significantly different:"
+                          (format "%.3f" p-val)
+                  )
+              )
+       )
+ )
+)
+
+(defn ex-2-22
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv") 
+       alpha 0.05]
+       (doseq [[site-a times-a] data
+               :let [p-val (-> (s/t-test times-a :mu 90)
+                                (:p-value)
+                            )
+                     ]
+              ]
+              (when (< p-val alpha)
+                 (println site-a
+                          "is significantly different:"
+                          (format "%.3f" p-val)
+                  )
+              )
+       )
+ )
+)
+
+
 
