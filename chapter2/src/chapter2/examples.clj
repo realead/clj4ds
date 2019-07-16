@@ -290,3 +290,19 @@
  )
 )
 
+
+(defn ex-2-19
+ []
+ (let [data    (->> (load-data "new-site.tsv")
+                    (i/$where {:site {:$eq 1}})
+                    (i/$ :dwell-time)
+               )
+      ]
+      (-> (s/bootstrap data s/mean :size 10000)
+          (c/histogram :nbins 20
+                       :x-label "Biitstrapped mean dwell times (s)")
+          (i/view)
+      )
+ )
+)
+
