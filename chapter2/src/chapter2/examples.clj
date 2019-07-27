@@ -439,3 +439,21 @@
  )
 )
 
+
+(defn ex-2-25
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv")
+       grouped (into [] (for [[k v] data] v))
+       box-plot (c/box-plot (first grouped)
+                            :x-label "Site number"
+                            :y-label "dwell-time")
+       add-box (fn [chart dwell-times]
+                   (c/add-box-plot chart dwell-times)
+               )]
+
+       (-> (reduce add-box box-plot (rest grouped))
+           (i/view)
+       )
+ )
+)
+
