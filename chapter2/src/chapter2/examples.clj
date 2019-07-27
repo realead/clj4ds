@@ -457,3 +457,23 @@
  )
 )
 
+
+(defn ex-2-26
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv")
+       site-0 (get data 0)
+       site-10 (get data 10)]
+      (s/t-test site-10 :y site-0)
+ )
+)
+
+
+(defn ex-2-27
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv")
+       site-0 (get data 0)
+       site-6 (get data 6)]
+      (s/t-test site-6 :y site-0)
+ )
+)
+
