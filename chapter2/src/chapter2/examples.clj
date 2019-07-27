@@ -101,6 +101,7 @@
   (/ (s/sd data) (Math/sqrt (count data)))
 )
 
+
 (defn ex-2-8
   [data]
   (let  [may-1 (f/parse-local-date "2015-05-01")]
@@ -474,6 +475,30 @@
        site-0 (get data 0)
        site-6 (get data 6)]
       (s/t-test site-6 :y site-0)
+ )
+)
+
+
+; cohens's d
+
+(defn pooled-standard-deviation 
+  [a b]
+  (i/sqrt (+ (i/sq (s/sd a))
+             (i/sq (s/sd b))
+          )
+  )
+)
+
+(defn ex-2-28
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv")
+       site-0 (get data 0)
+       site-6 (get data 6)]
+      (/ (- (s/mean site-0)
+            (s/mean site-6)
+         )
+         (pooled-standard-deviation site-0 site-6)
+      )
  )
 )
 
