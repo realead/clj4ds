@@ -20,5 +20,12 @@ Some examples are typed down verbatim, some are changed slightly - everything wh
 
 ### Chapter 2
 
+   * Download files as noted in chapter2/data/README.md
+   * extract and put the downloaded data into chapter2/data
+   * `cd chapter2`
+   * `lein run` for running all examples
+
+### Chapter 3
+
    TODO
 
