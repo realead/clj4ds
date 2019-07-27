@@ -388,4 +388,54 @@
 )
 
 
+(defn ssw 
+  [groups]
+  (->> (map s/sum-of-square-devs-from-mean groups)
+       (reduce +)
+  ) 
+)
+
+
+(defn sst 
+  [groups]
+  (let [data (apply concat groups)]
+       (s/sum-of-square-devs-from-mean (vec data))
+  )
+)
+
+(defn ssb
+  [groups]
+  (- (sst groups)
+     (ssw groups)
+  )
+)
+
+(defn f-stat 
+  [groups df1 df2]
+  (let [msb (/ (ssb groups) df1)
+        msw (/ (ssw groups) df2)]
+     (/ msb msw)
+  )
+)
+
+(defn f-test 
+ [groups]
+ (let [n (count (apply concat groups))
+       m (count groups)
+       df1 (- m 1)
+       df2 (- n m)
+       f-stat (f-stat groups df1 df2)]
+    (s/cdf-f f-stat :df1 df1 :df2 df2 :lower-tail? false) 
+ )
+)
+
+
+;f-test
+(defn ex-2-24
+ []
+ (let [data (load-and-group-data "multiple-sites.tsv")
+       grouped (into [] (for [[k v] data] v))]
+      (f-test grouped)
+ )
+)
 
