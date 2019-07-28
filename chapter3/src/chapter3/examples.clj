@@ -12,10 +12,8 @@
 )
 
 (defn ex-3-1
-  []
-  (-> (athlete-data)
-      (i/view)
-  )
+  [data]
+  (i/view data)
 )
 
 
