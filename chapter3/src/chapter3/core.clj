@@ -9,12 +9,18 @@
 
 
 (def examples [
- ;                     ex-3-1 
+ ;                     
               ]
 )
 
 (def examples-with-data [
-                    ex-3-1
+;                    ex-3-1
+;                    ex-3-2
+;                    ex-3-3
+;                    ex-3-4
+;                   ex-3-5
+                   ex-3-6
+                    ex-3-7
               ]
 )
 
