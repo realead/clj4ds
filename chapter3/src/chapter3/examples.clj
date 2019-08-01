@@ -118,3 +118,94 @@
   )
 )
 
+(defn ex-3-8
+  [data]
+  (let [swimmers (swimmer-data data)
+        heights (i/$ "Height, cm" swimmers)
+        weights (i/$ "Weight" swimmers)]
+      (println "correlation" (s/correlation heights weights))
+      (println "correlation log" (s/correlation heights (i/log weights)))
+  )
+)
+
+
+; ex-3-9, for (an outline of) an explanation, why this works see: https://en.wikipedia.org/wiki/Pearson_correlation_coefficient#Testing_using_Student&#39;s_t-distribution
+
+
+; under the assumption that rho is 0, the distribution of r is t-student's for df=n-2 (i.e. can be approximated by normal distribution)
+
+(defn t-value-for-rho-zero
+  [r df]
+  (let [denom (- 1 (* r r))]
+     (* r (i/sqrt ( / df denom)))
+  )
+)
+
+(defn ex-3-9
+  [data]
+  (let [swimmers (swimmer-data data)
+        heights (i/$ "Height, cm" swimmers)
+        weights (i/$ "Weight" swimmers)
+        r (s/correlation heights weights)
+        df (- (count heights) 2)
+        t (t-value-for-rho-zero r df)
+        p-t (s/cdf-t t :df df :lower-tail? false)
+        p-n (- 1 (s/cdf-normal t :mu 0 :sd 1)) ; need :lower-tail? false
+        ]
+      (println "t-value" t)
+      (println "p-t-student" (* 2 p-t))
+      (println "p-norma," (* 2 p-n))
+      (println "df" df "r" r)
+  )
+)
+
+; using Fisher-transformation (https://en.wikipedia.org/wiki/Fisher_transformation)
+; which just a heuristic, but nontheless...
+
+(defn critical-value 
+  [confidence ntails]
+  (let [lookup (- 1 (/ (- 1 confidence) ntails))]
+     (s/quantile-normal lookup)
+  )
+)
+
+
+(defn r->z
+  [r]
+  (* 0.5 (i/log (/ (+ 1 r) (- 1 r))))
+) 
+
+(defn z->r
+  [z]
+  (let [z2 (* 2 z)
+        expz2 (i/exp z2)
+       ]
+    (/ (- expz2 1) (+ expz2 1))
+  )
+)
+
+(defn r-confidence-interval
+  [r n alpha]
+  (let [z (r->z r)
+        S (/ 1 (i/sqrt (- n 3)))
+        crit (critical-value alpha 2)
+        delta (* crit S)
+        z_down (- z delta)
+        z_up (+ z delta)
+        ]
+   (map z->r [z_down z_up])
+  )  
+)
+
+
+(defn ex-3-10
+  [data]
+  (let [swimmers (swimmer-data data)
+        heights (i/$ "Height, cm" swimmers)
+        weights (i/$ "Weight" swimmers)
+        r (s/correlation heights weights)]
+      (println "0.95-confidence interval: " (r-confidence-interval r (count heights) 0.95))
+  )
+)
+
+
