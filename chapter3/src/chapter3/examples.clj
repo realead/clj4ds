@@ -297,6 +297,7 @@
        (map residual x y)
   )
 )
+
 (defn ex-3-14
   [data]
   (let [[heights weights] (swimmer_h_and_w data)
@@ -310,3 +311,39 @@
        )
   )
 ) 
+
+(defn r-squared
+  [x y]
+  (let [ eps (residuals x y)
+         eps-var (s/variance eps)
+         y-var (s/variance y)]
+       (- 1 (/ eps-var y-var))
+  )
+)
+
+(defn ex-3-15
+  [data]
+  (let [[heights weights] (swimmer_h_and_w data)]
+       (r-squared heights weights)
+  )
+) 
+
+;from data
+(defn ex-3-16
+  [data]
+  (let [extracted (i/$ ["Height, cm"  "Weight"] data)
+        filtered-data (i/$where {"Height, cm" {:$ne nil} "Weight" {:$ne nil}} extracted)]
+     (i/to-matrix filtered-data)
+  )
+) 
+
+;from sequencies
+(defn ex-3-17
+  [data]
+  (i/matrix (remove nil? (i/$ "Height, cm" data)))
+) 
+
+
+
+
+
