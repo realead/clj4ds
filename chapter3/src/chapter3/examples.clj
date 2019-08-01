@@ -202,10 +202,111 @@
   [data]
   (let [swimmers (swimmer-data data)
         heights (i/$ "Height, cm" swimmers)
-        weights (i/$ "Weight" swimmers)
+        weights (i/log (i/$ "Weight" swimmers))
         r (s/correlation heights weights)]
       (println "0.95-confidence interval: " (r-confidence-interval r (count heights) 0.95))
   )
 )
 
 
+(defn ex-3-11
+  []
+  (let [c->f (fn [x] (+ 32 (* 1.8 x)))]
+    (-> (c/function-plot c->f -10 40 
+             :x-label "Celcius"
+             :y-label "Fahrenheit")
+        (i/view)
+    )
+  )
+)
+
+(defn slope 
+  [x y]
+  (/ (s/covariance x y)
+     (s/variance x)
+  )
+)
+
+(defn intercept 
+  [x y]
+  (- (s/mean y)
+     (* (s/mean x) (slope x y))
+  )
+)
+
+(defn swimmer_h_and_w 
+   [data]
+   (let [swimmers (swimmer-data data)
+        heights (i/$ "Height, cm" swimmers)
+        weights (i/log (i/$ "Weight" swimmers))]
+      [heights weights]
+   )  
+)
+
+(defn ex-3-12
+  [data]
+  (let [[heights weights] (swimmer_h_and_w data)
+         b (slope heights weights)
+         a (intercept heights weights)
+       ]
+       (println "Intercept: " a)
+       (println "Slope: " b)
+  )
+)
+
+(defn ex-3-13
+  [data]
+  (let [[heights weights] (swimmer_h_and_w data)
+         b (slope heights weights)
+         a (intercept heights weights)
+         heights (map (jitter 0.5) heights)
+         regression (fn [x] (+ a (* x b)))
+       ]
+       (-> (c/function-plot regression 150 220 
+             :x-label "Height, cm"
+             :y-label "log(Weight)")
+           (c/add-points heights weights)
+           (i/view)
+       )
+  )
+) 
+
+(defn ex-3-13b
+  [data]
+  (let [[heights weights] (swimmer_h_and_w data)
+         b (slope heights weights)
+         a (intercept heights weights)
+         heights (map (jitter 0.5) heights)
+         regression (fn [x] (+ a (* x b)))
+       ]
+       (-> (c/scatter-plot heights weights 
+             :x-label "Height, cm"
+             :y-label "log(Weight)")
+           (c/add-function regression 150 220)
+           (i/view)
+       )
+  )
+) 
+
+(defn residuals
+  [x y]
+  (let [ b (slope x y)
+         a (intercept x y)
+         estimate (fn [z] (+ a (* z b)))
+         residual (fn [x y] (- y (estimate x)))]
+       (map residual x y)
+  )
+)
+(defn ex-3-14
+  [data]
+  (let [[heights weights] (swimmer_h_and_w data)
+         res (residuals heights weights)
+       ]
+       (-> (c/scatter-plot heights res
+             :x-label "Height, cm"
+             :y-label "log(Weight)")
+           (c/add-function (constantly 0) 150 220)
+           (i/view)
+       )
+  )
+) 
