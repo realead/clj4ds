@@ -344,6 +344,115 @@
 ) 
 
 
+(defn add-bias
+  [mat]
+  (i/bind-columns (repeat (i/nrow mat) 1) mat)
+)
 
+(defn normal-equation 
+  [x y]
+  (let [xt (i/trans x)
+        xtx (i/mmult xt x)
+        xty (i/mmult xt y)]
+     (i/solve xtx xty)
+  )
+)
+
+(defn ex-3-18
+  [data]
+  (let [[x y] (map i/matrix (swimmer_h_and_w data))]
+       (normal-equation (add-bias x) y)
+  )
+) 
+
+
+(defn extract-and-filter
+  [data column-names]
+  (let [extracted (i/$ column-names data)
+        nil-filter (into {} (for [name column-names] [name {:$ne nil}]))]
+        (i/$where nil-filter extracted)
+  )     
+)
+
+
+(defn feature-matrix 
+  [col-names dataset]
+  (-> (extract-and-filter dataset col-names)
+      (i/to-matrix)
+  )
+)
+
+(defn ex-3-19
+  [data]
+  (feature-matrix ["Height, cm" "Age"] (swimmer-data data))
+)
+ 
+
+(defn ex-3-20
+  [data]
+  (let [filtered (->> (extract-and-filter data ["Height, cm" "Age" "Weight" "Sport"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Age"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        ]
+    (normal-equation x y)
+  )
+)
+
+(defn r-squared-mat 
+   [x y]
+   (let [coefs (normal-equation x y)
+         fitted (i/mmult x coefs)
+         resids (i/minus y  fitted)
+         difs   (i/minus y (s/mean y))
+         rss    (i/sum-of-squares resids)
+         ess    (i/sum-of-squares difs)
+        ]
+      (- 1 (/ rss ess))
+   )
+)
+
+
+(defn r-squared-mat-adj 
+   [x y]
+   (let [r-squared (r-squared-mat x y)
+         n (count y)
+         p (i/ncol x)
+         rel (- 1 r-squared)
+         adj-rel (*  rel (/ (dec n) (dec (- n p))))
+        ]
+      (- 1 adj-rel)
+   )
+)
+
+
+
+(defn ex-3-2122
+  [data]
+  (let [filtered (->> (extract-and-filter data ["Height, cm" "Age" "Weight" "Sport"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Age"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        ]
+    (println "r-squared" (r-squared-mat x y))
+    (println "r-squared-adj" (r-squared-mat-adj x y))
+  )
+)
+
+ 
 
 
