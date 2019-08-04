@@ -453,6 +453,97 @@
   )
 )
 
- 
+(defn f-test-mat 
+   [coefs x y]
+   (let [fitted (i/mmult x coefs)
+         resids (i/minus y  fitted)
+         difs   (i/minus y (s/mean y))
+         rss    (i/sum-of-squares resids)
+         ess    (i/sum-of-squares difs)
+         p      (i/ncol x)
+         n      (i/nrow x)
+         df1    (- p 1)
+         df2    (- n p)
+         msm    (/ ess df1)
+         mse    (/ rss df2)
+         f-stat (/ msm mse)
+        ]
+      (s/cdf-f f-stat :df1 df1 :df2 df2 :lower-tail? false)
+   )
+)
 
+(defn ex-3-23
+  [data]
+  (let [filtered (->> (extract-and-filter data ["Height, cm" "Age" "Weight" "Sport"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Age"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        coefs (:coefs (s/linear-model y x :intercept false))
+        ]
+    (f-test-mat coefs x y)
+  )
+)
+
+(defn dummy-mf
+   [sex]
+   (if (= sex "F")
+      0.0
+      1.0
+   )
+)
+
+(defn ex-3-25
+  [data]
+  (let [ filtered (->>(extract-and-filter data ["Height, cm" "Age" "Weight" "Sport" "Sex"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                      (i/add-derived-column "Dummy MF" ["Sex"] dummy-mf)
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Age" "Dummy MF"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        ]
+    (println "r-squared-adj" (r-squared-mat-adj x y))
+  )
+)
+
+(defn beta-weight
+  [x y]
+  (let [coefs (:coefs (s/linear-model y x :intercept false))
+        sdx (map s/sd (i/trans x))
+        sdy (s/sd y)
+       ]
+       (map #(/ (* %1 %2) sdy) sdx coefs) 
+  )
+)
+
+(defn ex-3-26
+  [data]
+  (let [ filtered (->>(extract-and-filter data ["Height, cm" "Age" "Weight" "Sport" "Sex"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                      (i/add-derived-column "Dummy MF" ["Sex"] dummy-mf)
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Age" "Dummy MF"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        ]
+    (beta-weight x y)
+  )
+)
 
