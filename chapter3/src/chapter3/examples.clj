@@ -6,8 +6,10 @@
             [incanter.stats :as s]
             [incanter.charts :as c]
             [incanter.distributions :as d]
+            [clj-time.core :as time]
             [clj-time.format :as f]
             [clj-time.predicates :as p]
+            [clj-time.coerce :as coerce]
   )
 )
 
@@ -546,4 +548,130 @@
     (beta-weight x y)
   )
 )
+
+(defn to-year 
+  [str]
+  (-> (coerce/from-date str)
+      (time/year)
+  )
+)
+
+
+(defn ex-3-27
+  [data]
+  (let [ filtered (->>(extract-and-filter data ["Height, cm" "Age" "Weight" "Sport" "Sex" "Date of birth"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                      (i/add-derived-column "Dummy MF" ["Sex"] dummy-mf)
+                      (i/add-derived-column "Year of birth" ["Date of birth"] to-year)
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Age" "Dummy MF" "Year of birth"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        ]
+    (beta-weight x y)
+  )
+)
+
+
+(defn ex-3-28
+  [data]
+  (let [ filtered (->>(extract-and-filter data ["Height, cm" "Age" "Weight" "Sport" "Sex" "Date of birth"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                      (i/add-derived-column "Dummy MF" ["Sex"] dummy-mf)
+                      (i/add-derived-column "Year of birth" ["Date of birth"] to-year)
+                 )
+        
+        x  (->> (i/$ "Age" filtered)
+               (map (jitter 0.5))
+           )
+        y  (i/$ "Year of birth" filtered)
+        ]
+    (->> (c/scatter-plot x y 
+                  :x-label "Age"
+                  :y-label "Year of birth")
+         (i/view)
+    )
+  )
+)
+
+(defn predict
+   [coefs x]
+   (-> (i/trans coefs)
+       (i/mmult x)
+       (first)
+   )
+)
+
+(defn ex-3-29
+  [data]
+  (let [ filtered (->>(extract-and-filter data ["Height, cm" "Age" "Weight" "Sport" "Sex" "Date of birth"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                      (i/add-derived-column "Dummy MF" ["Sex"] dummy-mf)
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Dummy MF" "Age"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        coefs (:coefs (s/linear-model y x :intercept false))
+        xspitz (i/matrix [1.0 183 1 22])
+      ]
+    (i/exp (predict coefs xspitz))
+  )
+)
+
+(defn prediction-interval
+   [x y a]
+   (let [xtx   (i/mmult (i/trans x) x)
+         xtxi  (i/solve xtx)
+         xty   (i/mmult (i/trans x) y)
+         coefs (i/mmult xtxi xty)
+         fitted (i/mmult x coefs)
+         resid (i/minus y fitted)
+         rss    (i/sum-of-squares resid)
+         n (i/nrow y)
+         p (i/ncol x)
+         dfe (- n p)
+         mse (/ rss  dfe)
+         se-y (first (i/mmult (i/trans a) xtxi a))
+         t-stat (i/sqrt (* mse (+ 1 se-y)))
+         pred-y (predict coefs a)
+         delta (* (s/quantile-t 0.975 :df dfe)  t-stat)
+         ]
+       [(- pred-y delta) (+ pred-y delta)]
+   )
+)
+
+
+(defn ex-3-30
+  [data]
+  (let [ filtered (->>(extract-and-filter data ["Height, cm" "Age" "Weight" "Sport" "Sex" "Date of birth"])
+                      (i/$where {"Sport" {:$eq "Swimming"}})
+                      (i/add-derived-column "Dummy MF" ["Sex"] dummy-mf)
+                 )
+        
+        x  (-> (feature-matrix ["Height, cm" "Dummy MF" "Age"] filtered)
+               (add-bias)
+           )
+        y  (-> (i/$ "Weight" filtered)
+               (i/log)
+               (i/matrix)
+           )
+        coefs (:coefs (s/linear-model y x :intercept false))
+        xspitz (i/matrix [1.0 183 1 22])
+      ]
+    (i/exp (prediction-interval x y xspitz))
+  )
+)
+
+
+
 
