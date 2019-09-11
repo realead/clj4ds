@@ -27,5 +27,20 @@ Some examples are typed down verbatim, some are changed slightly - everything wh
 
 ### Chapter 3
 
-   TODO
+   * Download files as noted in chapter3/data/README.md
+   * extract and put the downloaded data into chapter3/data
+   * `cd chapter3`
+   * `lein run` for running all examples
+
+### Chapter 4
+
+   * Download files as noted in chapter4/data/README.md
+   * extract and put the downloaded data into chapter3/data
+   * `cd chapter4`
+   * `lein run` for running all examples
+
+### Chapter 5
+
+ToDo
+
 
