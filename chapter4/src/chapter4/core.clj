@@ -14,7 +14,12 @@
 )
 
 (def examples-with-data [
-                  ex-4-1
+;                 ex-4-1
+;                 ex-4-2
+;                 ex-4-3
+;                 ex-4-4
+                  ex-4-5
+                  ex-4-6
               ]
 )
 
