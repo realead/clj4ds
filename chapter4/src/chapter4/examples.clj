@@ -109,3 +109,51 @@
       )
   )
 )
+
+
+(defn ex-4-7
+  [data]
+  (let [passengers (concat (repeat 127 0)
+                           (repeat 339 1)
+                   )
+        bootstrap (s/bootstrap passengers i/sum :size 10000)]
+        (-> (c/histogram bootstrap
+                         :x-label "Female survivors"
+                         :nbins 20
+            )
+            (i/view)
+        )
+   )
+)
+
+(defn ex-4-8
+  [data]
+  (let [passengers (concat (repeat 127 0)
+                           (repeat 339 1)
+                   )
+        bootstrap (s/bootstrap passengers i/sum :size 10000)]
+        (s/sd bootstrap)
+   )
+)
+
+(defn ex-4-9 
+  [data]
+  (let [passengers (concat (repeat 127 0)
+                           (repeat 339 1)
+                   )
+        bootstrap (s/bootstrap passengers i/sum :size 10000)
+        binom  (fn [x] (s/pdf-binomial x :size 466 :prob (/ 339 466)))
+        normal (fn [x] (s/pdf-normal x :mean 339 :sd 9.57))
+       ]
+        (-> (c/histogram bootstrap
+                         :x-label "Female survivors"
+                         :nbins 20
+                         :density true
+                         :legend true
+            )
+            (c/add-function binom 300 380 :series-label "binomial")
+            (c/add-function normal 300 380 :series-label "norma")
+            (i/view)
+        )
+   )
+)
