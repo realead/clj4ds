@@ -157,3 +157,21 @@
         )
    )
 )
+
+(defn se-binom
+   [p n]
+   (i/sqrt (* p (- 1 p) (/ 1 n)))
+)
+
+(defn ex-4-10
+  [data]
+  (let [groups (frequency-map :count [:sex :survived] data)
+        survived (get-in groups ["female" "y"])
+        perished (get-in groups ["female" "n"])
+        n (+ survived perished)
+        p (float (/ survived n))
+      ]
+      ;(print groups survived perished)
+      (se-binom p n) 
+  )
+)
