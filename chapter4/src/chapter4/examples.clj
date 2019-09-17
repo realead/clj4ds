@@ -175,3 +175,54 @@
       (se-binom p n) 
   )
 )
+
+
+(defn ex-4-11
+   [data]
+   (let [survived (frequency-map :count [:survived] data)
+         proportions (fatalaties-by-sex data)
+         total (reduce + (vals survived))
+         pooled (/ (get survived "n") total)
+         se-pooled (se-binom pooled total)
+         p-diff (- (get proportions :male)
+                   (get proportions :female)
+                )
+        z-stat (/ p-diff se-pooled)]
+      (- 1 (s/cdf-normal (i/abs z-stat)))
+   )
+)
+
+
+(defn se-large_proportion
+   [p n N]
+   (* (se-binom p n)
+      (i/sqrt (/ (- N n)
+                 (- N 1)
+              )
+      )
+   )
+) 
+
+
+(defn ex-4-12
+  [data]
+  (frequency-table :count [:pclass :survived] data)
+)
+
+
+(defn ex-4-13
+  [data]
+  (let [table (frequency-table :count [:pclass :survived] data)]
+    (-> (c/stacked-bar-chart :pclass :count
+                            :group-by :survived
+                            :legend true
+                            :x-label "Class"        
+                            :y-label "Passengers"
+                            :data table
+        )
+        (i/view)
+     )
+  )
+)
+
+
