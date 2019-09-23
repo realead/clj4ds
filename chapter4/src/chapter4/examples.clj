@@ -225,4 +225,80 @@
   )
 )
 
+(defn expected-frequencies 
+  [data]
+  (let [as (vals (frequency-map :count [:survived] data))
+        bs (vals (frequency-map :count [:pclass] data))
+        total (count (:rows data))]
+       (for [a as
+             b bs]
+             (* a (float (/ b total)))
+       )
+  )
+) 
+
+(defn ex-4-14
+  [data]
+  (expected-frequencies data)
+)
+
+
+(defn observed-frequencies
+  [data]
+  (let [as (frequency-map :count [:survived] data)
+        bs (frequency-map :count [:pclass] data)
+        actual (frequency-map :count [:survived :pclass] data)]
+        (for [a (keys as)
+              b (keys bs)]
+              (get-in actual [a b])
+        )
+   )
+)
+
+(defn ex-4-15
+  [data]
+  (observed-frequencies data)
+)
+
+(defn chisq-stat
+  [observed expected]
+  (let [f (fn [o e] (/ (i/sq (- o e)) e))]
+    (reduce + (map f observed expected))
+  )
+)
+
+
+(defn ex-4-16
+  [data]
+  (let [observed (observed-frequencies data)
+        expected (expected-frequencies data)]
+     (chisq-stat observed expected)
+  )
+)
+
+(defn ex-4-17
+  [data]
+  (let [observed (observed-frequencies data)
+        expected (expected-frequencies data)
+        x2-stat (chisq-stat observed expected)]
+       (s/cdf-chisq x2-stat :df 2 :lower-tail? false)
+  )
+)
+
+
+(defn ex-4-18
+  [data]
+  (let [table (->> (frequency-table :count [:survived :pclass] data)
+                   (i/$order [:survived :pclass] :asc)    
+              )
+        freqs   (i/$ :count table)
+        matrix  (i/matrix freqs 3)
+       ]
+      (println "observed:" table)
+      (println "freqs:" freqs)
+      (println "observations" matrix)
+      (println "chisq-test:")
+      (s/chisq-test :table matrix)
+  )
+)
 
