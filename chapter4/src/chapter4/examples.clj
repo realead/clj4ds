@@ -6,6 +6,7 @@
             [incanter.stats :as s]
             [incanter.charts :as c]
             [incanter.distributions :as d]
+            [incanter.optimize :as o]
             [clj-time.core :as time]
             [clj-time.format :as f]
             [clj-time.predicates :as p]
@@ -302,3 +303,50 @@
   )
 )
 
+(defn sigmoid-function
+  [coefs]
+  (let [z (fn [x] (- (first (i/mmult (i/trans coefs) x))))]
+     (fn [x] 
+       (/ 1
+          (+ 1 (i/exp (z x)))
+       )
+     )
+  )
+)
+
+(defn logistic-cost 
+  [ys y-hats]
+  (let [cost (fn [y y-hat]
+                 (if (zero? y)
+                     (- (i/log (- 1 y-hat)))
+                     (- (i/log y-hat))
+                 )
+              )
+       ]
+       (s/mean (map cost ys y-hats))
+  )
+)
+
+
+(defn ex-4-19
+  []
+  (let [f (fn [[x]]
+               (i/sq x)
+          )
+        init [10]]
+   (o/minimize f init)
+  )
+)
+
+(defn ex-4-20
+  []
+  (let [f (fn [[x]]
+              (i/sin x)
+          )
+       ]
+     (println (:value (o/minimize f [1])))
+     (println (:value (o/minimize f [10])))
+     (println (:value (o/minimize f [100])))
+  )
+)
+    
