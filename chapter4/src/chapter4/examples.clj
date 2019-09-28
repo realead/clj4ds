@@ -349,4 +349,167 @@
      (println (:value (o/minimize f [100])))
   )
 )
-    
+
+
+(defn logistic-regression 
+  [ys xs]
+  (let [cost-fn (fn [coefs]
+                    (let [classify (sigmoid-function coefs)
+                          y-hats (map (comp classify i/trans) xs)
+                         ]
+                       (logistic-cost ys y-hats)
+                    )
+                 )
+            init-coefs (repeat (i/ncol xs) 0.0)
+        ]
+       (o/minimize cost-fn init-coefs)
+   )
+)
+
+(defn add-dummy 
+   [col-name from-col value dataset]
+   (i/add-derived-column col-name
+                         [from-col]
+                         #(if (= % value) 1 0)
+                         dataset
+   )
+)
+
+(defn matrix-dataset
+    [data]
+   (->> (add-dummy :dummy-survived :survived "y" data)
+        (i/add-column :bias (repeat 1.0))
+        (add-dummy :dummy-mf :sex "male")
+        (add-dummy :dummy-1 :pclass "first")
+        (add-dummy :dummy-2 :pclass "second")
+        (add-dummy :dummy-3 :pclass "third")
+        (i/$ [:dummy-survived :bias :dummy-mf :dummy-1 
+              :dummy-2 :dummy-3])
+        (i/to-matrix)
+   )
+)
+
+
+(defn ex-4-21
+  [data]
+  (let [matrix (matrix-dataset data)
+        ys (i/$ 0 matrix)
+        xs (i/$ [:not 0] matrix)
+        ]
+     (-> (logistic-regression ys xs)
+         (get :value)
+     )
+  )
+) 
+
+(defn ex-4-22
+   [data]
+   (let [matrix (matrix-dataset data)
+         ys (i/$ 0 matrix)
+         xs (i/$ [:not 0] matrix)
+         coefs (-> (logistic-regression ys xs)
+                    (get :value)
+               )
+         classifier (comp  #(Math/round %)
+                           (sigmoid-function coefs)
+                           i/trans
+                    )
+         ]
+         (println "observed  " (map int (take 10 ys)))
+         (println "predicted " (map classifier (take 10 xs)))
+   )
+)
+
+
+(defn ex-4-23
+   [data]
+   (let [matrix (matrix-dataset data)
+         ys (i/$ 0 matrix)
+         xs (i/$ [:not 0] matrix)
+         coefs (-> (logistic-regression ys xs)
+                    (get :value)
+               )
+         classifier (comp  #(Math/round %)
+                           (sigmoid-function coefs)
+                           i/trans
+                    )
+         y-hats (map classifier xs)
+         ]
+         (frequencies (map = y-hats (map int ys)))
+   )
+)
+
+
+(defn confusion-matrix
+  [ys y-hats]
+  (let [classes (into #{} (concat ys y-hats))
+        confusion (frequencies (map vector ys y-hats))
+        ]
+        (i/dataset (cons nil classes)
+                   (for [x classes]
+                      (cons x
+                          (for [y classes]
+                               (get confusion [x y])
+                           )
+                      )
+                    )
+         )
+   )
+)
+
+(defn ex-4-24
+   [data]
+   (let [matrix (matrix-dataset data)
+         ys (i/$ 0 matrix)
+         xs (i/$ [:not 0] matrix)
+         coefs (-> (logistic-regression ys xs)
+                    (get :value)
+               )
+         classifier (comp  #(Math/round %)
+                           (sigmoid-function coefs)
+                           i/trans
+                    )
+         y-hats (map classifier xs)
+         ]
+         (confusion-matrix (map int ys) y-hats)
+   )
+)
+
+
+(defn kappa-statistics
+  [ys y-hats]
+  (let [n (count ys)
+        pa (/ (count (filter true? (map = ys y-hats))) n)
+        ey (/ (count (filter zero? ys)) n)
+        eyh (/ (count (filter zero? y-hats)) n)
+        pe (+ (* ey eyh)
+              (* (- 1 ey)
+                 (- 1 eyh)
+               )
+            )
+        ]
+       (float (/ (- pa pe)
+                 (- 1 pe)
+               )
+       )
+   )
+)
+
+(defn ex-4-25
+   [data]
+   (let [matrix (matrix-dataset data)
+         ys (i/$ 0 matrix)
+         xs (i/$ [:not 0] matrix)
+         coefs (-> (logistic-regression ys xs)
+                    (get :value)
+               )
+         classifier (comp  #(Math/round %)
+                           (sigmoid-function coefs)
+                           i/trans
+                    )
+         y-hats (map classifier xs)
+         ]
+         (kappa-statistics (map int ys) y-hats)
+   )
+)
+
