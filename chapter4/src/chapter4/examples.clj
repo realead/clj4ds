@@ -513,3 +513,122 @@
    )
 )
 
+(defn inc-class-total
+  [model class]
+  (-> (update-in model [:classes class :total] (fnil inc 0))
+      (update-in [:total] (fnil inc 0))
+  )
+)
+
+(defn inc-predictors-count-fn 
+  [row class]
+  (fn [model attr]
+    (let [val (get row attr)]
+       (update-in model [:classes class :predictors attr val] (fnil inc 0))
+    )
+  )
+)
+
+(defn assoc-row-fn 
+  [class-attr predictors]
+  (fn [model row]
+      (let [class (get row class-attr)]
+           (reduce (inc-predictors-count-fn row class)
+                   (inc-class-total model class)
+                   predictors
+           )
+       )
+  )
+)
+
+(defn bayes-classifier
+  [class-attr predictors data]
+    (reduce (assoc-row-fn class-attr predictors) {} data)
+)
+
+
+(defn ex-4-26
+  [data]
+  (->> (:rows data)
+       (bayes-classifier :survived [:sex :pclass])
+       (clojure.pprint/pprint)
+  )
+)
+
+
+
+(defn posterior-probability
+   [model test class-attr]
+   (let [observed (get-in model [:classes class-attr])
+         prior (/ (:total observed)
+                  (:total model)
+               )
+        ]
+        (apply * prior
+                 (for [[predictor value] test]
+                      (/ (get-in observed [:predictors  predictor value])
+                         (:total observed)
+                      )
+                 )
+        )
+   )
+)
+
+(defn bayes-classify 
+   [model test]
+   (let [probability (partial posterior-probability model test)
+         classes (keys (:classes model))]
+        (apply max-key probability classes)
+   )
+)
+
+(defn ex-4-27
+  [data]
+  (let [model (->> (:rows data)
+                  (bayes-classifier :survived [:sex :pclass])
+              )]
+       (println "third class male" 
+                    (bayes-classify model {:sex "male" :pclass "third"})
+       )
+       (println "first class female" 
+                    (bayes-classify model {:sex "female" :pclass "first"})
+       )
+  )
+)
+
+
+(defn ex-4-28
+  [data]
+  (let [model (->> (:rows data)
+                  (bayes-classifier :survived [:sex :pclass])
+              )
+        test (fn [test]
+                (= (:survived test)
+                   (bayes-classify model (select-keys test [:sex :class]))
+                )
+              )
+        results (frequencies (map test (:rows data)))
+       ]
+       (/ (get results true)
+          (apply + (vals results))
+       )
+  )
+)
+
+
+(defn ex-4-29
+  [data]
+  (let [model (->> (:rows data)
+                  (bayes-classifier :survived [:sex :pclass])
+              )
+        classify (fn [test]
+                   (->> (select-keys test [:sex :class])
+                     (bayes-classify model)
+                   )
+                 )
+        ys (map :survived (:rows data))
+        y-hats (map classify (:rows data))
+       ]
+       (confusion-matrix ys y-hats)
+  )
+)
