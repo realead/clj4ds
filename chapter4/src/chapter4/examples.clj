@@ -632,3 +632,93 @@
        (confusion-matrix ys y-hats)
   )
 )
+
+(defn information 
+  [p]
+  (- (i/log2 p))
+)
+
+(defn entropy 
+   [xs]
+   (let [n (count xs)
+         f (fn [x] 
+               (let [p (/ x n)]
+                    (* p (information p))
+               )
+            )
+        ]
+        (->> (frequencies xs)
+             (vals)
+             (map f)
+             (reduce +)
+        )
+    )
+)
+
+(defn ex-4-3031
+  []
+  (let [red-black (concat (repeat 26 1)
+                          (repeat 26 0)
+                  )
+        picture-not-picture (concat (repeat 12 1)
+                                    (repeat 40 0)
+                            )
+       ]
+       (println "red-black" (entropy red-black))
+       (println "pic-not-pic" (entropy picture-not-picture))
+   )
+)
+
+(defn ex-4-32
+  [data]
+  (->> (:rows data)
+       (map :survived)
+       (entropy)
+  )
+)
+
+(defn weighted-entropy
+   [groups]
+   (let [n (count (apply concat groups))
+         e (fn [group]
+               (* (entropy group)
+                  (/ (count group) n)
+               )
+            )
+        ]
+        (->> (map e groups)
+             (reduce +) 
+        )
+   )
+)
+
+(defn ex-4-33
+  [data]
+  (->> (:rows data)
+       (group-by :sex)
+       (vals)
+       (map (partial map :survived))
+       (weighted-entropy)
+  )
+)
+
+(defn information-gain
+    [groups]
+    ( - (entropy (apply concat groups))
+        (weighted-entropy groups)
+    )
+)
+
+
+(defn ex-4-34
+  [data]
+  (->> (:rows data)
+       (group-by :pclass)
+       (vals)
+       (map (partial map :survived))
+       (information-gain)
+  )
+)
+              
+
+
