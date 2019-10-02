@@ -38,6 +38,10 @@ Some examples are typed down verbatim, some are changed slightly - everything wh
    * extract and put the downloaded data into chapter3/data
    * `cd chapter4`
    * `lein run` for running all examples
+   * for running only some examples use `lein repl`, and now
+       - `(def titanic (chapter4.data/titanic-data))` for loading data
+       - `(ex-4-33 titanic)` to run an example
+       - `(use 'chapter4.examples :reload)` to reload examples.clj
 
 ### Chapter 5
 
