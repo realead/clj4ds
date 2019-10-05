@@ -2,7 +2,8 @@
   :jvm-ops ["-Xmx1G"]
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [incanter/incanter   "1.5.5"]
-                 [clj-time "0.9.0"]]
+                 [clj-time "0.9.0"]
+                 [cc.artifice/clj-ml "0.5.1"]]
   :resource-paths ["data"]
   :main ^:skip-aot chapter4.core
   :target-path "target/%s"
