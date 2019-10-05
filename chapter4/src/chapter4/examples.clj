@@ -721,4 +721,119 @@
 )
               
 
+(defn gain-for-predictor
+ [class-attr xs predictor]
+   (->> (group-by predictor xs)
+        (vals)
+        (map (partial map class-attr))
+        (information-gain)
+   )
+)
+
+
+(defn best-predictor
+ [class-attr predictors xs]
+   (let [gain (partial gain-for-predictor class-attr xs)]
+        (when (seq predictors)
+           (apply max-key gain predictors)
+        )
+   )
+)
+
+(defn ex-4-35
+  [data]
+  (->> (:rows data)
+       (best-predictor :survived [:sex :pclass])
+  )
+)
+
+(defn model-class 
+  [classes]
+  (->> (frequencies classes)
+       (apply max-key val)
+       (key)
+   )
+)   
+
+
+(defn map-vals 
+  [f m]
+  (into {} (for [[k v] m] [k (f v)]))
+)
+
+
+(defn decision-tree
+   [class-attr predictors xs]
+   (let [classes (map class-attr xs)]
+        (if (zero? (entropy classes))
+            (first classes)
+            (if-let [predictor (best-predictor class-attr
+                                                predictors xs)]
+                    (let [predictors (remove #{predictor} predictors)
+                          tree-branch (partial decision-tree
+                                               class-attr predictors)]
+                     (->> (group-by predictor xs)
+                          (map-vals tree-branch)
+                          (vector predictor)
+                     )
+                    )
+                    (model-class classes)
+             )
+         )
+   )
+) 
+
+
+(defn ex-4-36
+  [data]
+  (->> (:rows data)
+       (decision-tree :survived [:sex :pclass])
+       (clojure.pprint/pprint)
+  )
+)       
+
+(defn age-categories
+  [age]
+  (cond 
+     (nil? age) "unknown"
+     (< age 13) "child"
+     :default "adult"
+  )
+)
+
+(defn ex-4-37
+  [data]
+  (->> (i/transform-col data :age age-categories)
+       (:rows)
+       (decision-tree :survived [:sex :pclass :age])
+       (clojure.pprint/pprint)
+  )
+) 
+
+(defn tree-classify
+    [model test]
+    (if (vector? model)
+        (let [[predictor branches] model
+              branch (get branches (get test predictor))]
+             (recur branch test)
+        )
+        model
+    )
+)
+
+(defn ex-4-38
+  [data]
+  
+  (let [tree  (->> (i/transform-col data :age age-categories)
+                   (:rows)
+                   (decision-tree :survived [:sex :pclass :age])
+              )
+        test {:sex "male" :pclass "second" :age "child"}]
+       (tree-classify tree test)
+  )
+)
+
+
+
+
 
