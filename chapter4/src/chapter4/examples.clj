@@ -833,7 +833,45 @@
   )
 )
 
+(defn ex-4-39
+  [data]  
+  (let [ table (->> (i/transform-col data :age age-categories)
+                   (:rows)
+               )
+         tree  (decision-tree :survived [:sex :pclass :age] table)
+       ]
+       (confusion-matrix (map :survived table)
+                         (map (partial tree-classify tree) table)
+       )
+  )
+)
 
+(defn ex-4-40
+  [data]  
+  (let [ table (->> (i/transform-col data :age age-categories)
+                   (:rows)
+               )
+         tree  (decision-tree :survived [:sex :pclass :age] table)
+         ys (map :survived table)
+         y-hats (map (partial tree-classify tree) table)
+         transformer (fn [x] (if (= x "y") 1 0))
+       ]
+       (kappa-statistics (map transformer ys) (map transformer y-hats))
+  )
+)
 
+(defn ex-4-41
+  [data]  
+  (let [ table (->> (i/transform-col data :age age-categories)
+                   (:rows)
+               )
+         tree  (decision-tree :survived [:sex :pclass :age :fare] table)
+         ys (map :survived table)
+         y-hats (map (partial tree-classify tree) table)
+         transformer (fn [x] (if (= x "y") 1 0))
+       ]
+       (kappa-statistics (map transformer ys) (map transformer y-hats))
+  )
+)
 
 
