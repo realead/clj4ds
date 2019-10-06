@@ -11,6 +11,10 @@
             [clj-time.format :as f]
             [clj-time.predicates :as p]
             [clj-time.coerce :as coerce]
+            [clj-ml.data :as mld]
+            [clj-ml.classifiers :as cl]
+            [clj-ml.filters :as mlf]
+            [clj-ml.utils :as clu]
   )
 )
 
@@ -874,4 +878,149 @@
   )
 )
 
+
+(defn to-weka 
+  [dataset]
+  (let [attributes [{:survived ["y" "n"]}
+                    {:pclass ["first" "second" "third"]}
+                    {:sex ["male" "female"]}
+                    :age
+                    :fare]
+        vectors (->> dataset
+                     (i/$ [:survived :pclass :sex :age :fare])
+                     (i/to-vect)
+                )
+        ]
+        (mld/make-dataset :titanic-weka attributes vectors
+                          {:class :survived}
+        )
+   )
+)
+
+
+(defn ex-4-42
+  [data]  
+  (let [dataset (to-weka data)
+        classifier (-> (cl/make-classifier :decision-tree :c45)
+                       (cl/classifier-train dataset)
+                   )
+        classify (partial cl/classifier-classify classifier)
+        ys (map str (mld/dataset-class-values dataset))
+        y-hats (map name (map classify dataset))
+        transformer (fn [x] (if (= x "y") 1 0))
+       ]
+       (println "Confusion" (confusion-matrix ys y-hats))
+       (println "Kappa:" (kappa-statistics (map transformer ys) (map transformer y-hats)))
+   )
+)
+      
+
+(defn ex-4-43
+  [data]  
+  (let [[test-set train-set] (-> (to-weka data)
+                                 (mld/do-split-dataset :percentage 30)
+                             )
+        classifier (-> (cl/make-classifier :decision-tree :c45)
+                       (cl/classifier-train train-set)
+                   )
+        classify (partial cl/classifier-classify classifier)
+        ys (map str (mld/dataset-class-values test-set))
+        y-hats (map name (map classify test-set))
+        transformer (fn [x] (if (= x "y") 1 0))
+       ]
+       (println "Confusion" (confusion-matrix ys y-hats))
+       (println "Kappa:" (kappa-statistics (map transformer ys) (map transformer y-hats)))
+   )
+)
+                        
+
+(defn ex-4-44
+  [data]  
+  (let [[train-set test-set] (-> (to-weka data)
+                                 (mld/do-split-dataset :percentage 70)
+                             )
+        classifier (-> (cl/make-classifier :decision-tree :c45)
+                       (cl/classifier-train train-set)
+                   )
+        classify (partial cl/classifier-classify classifier)
+        ys (map str (mld/dataset-class-values test-set))
+        y-hats (map name (map classify test-set))
+        transformer (fn [x] (if (= x "y") 1 0))
+       ]
+       (println "Confusion" (confusion-matrix ys y-hats))
+       (println "Kappa:" (kappa-statistics (map transformer ys) (map transformer y-hats)))
+   )
+)
+
+                        
+
+(defn ex-4-45
+  [data]  
+  (let [dataset (to-weka data)
+        classifier (-> (cl/make-classifier :decision-tree :c45)
+                       ;(cl/classifier-train dataset)
+                   )
+        classify (partial cl/classifier-classify classifier)
+        evaluation (cl/classifier-evaluate classifier
+                                           :cross-validation
+                                           dataset 10)
+       ]
+       (println (:confusion-matrix evaluation))
+       (println (:summary evaluation))
+   )
+)
+
+
+(defn ex-4-46
+  [data]  
+  (let [dataset (->> (to-weka data)
+                     (mlf/make-apply-filter
+                                :replace-missing-values {})
+                )
+        classifier (-> (cl/make-classifier :decision-tree :c45)
+                       ;(cl/classifier-train dataset)
+                   )
+        classify (partial cl/classifier-classify classifier)
+        evaluation (cl/classifier-evaluate classifier
+                                           :cross-validation
+                                           dataset 10)
+       ]
+       (println (:kappa evaluation))
+   )
+)
+
+(defn ex-4-47
+  [data]  
+  (let [dataset (->> (to-weka data)
+                     (mlf/make-apply-filter
+                                :replace-missing-values {})
+                )
+        classifier (-> (cl/make-classifier :decision-tree :random-forest)
+                       ;(cl/classifier-train dataset)
+                   )
+        classify (partial cl/classifier-classify classifier)
+        evaluation (cl/classifier-evaluate classifier
+                                           :cross-validation
+                                           dataset 10)
+       ]
+       (println (:confusion-matrix evaluation))
+       (println (:summary evaluation))
+   )
+)
+
+
+(defn ex-4-48
+  [data]  
+  (let [dataset (->> (to-weka data)
+                     (mlf/make-apply-filter
+                                :replace-missing-values {})
+                )
+        classifier (-> (cl/make-classifier :decision-tree :random-forest)
+                       (cl/classifier-train dataset)
+                   )
+        file (io/file (io/resource "classifier.bin"))
+       ]
+       (clu/serialize-to-file classifier file)
+   )
+)
 
