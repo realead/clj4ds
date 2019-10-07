@@ -35,7 +35,7 @@ Some examples are typed down verbatim, some are changed slightly - everything wh
 ### Chapter 4
 
    * Download files as noted in chapter4/data/README.md
-   * extract and put the downloaded data into chapter3/data
+   * extract and put the downloaded data into chapter4/data
    * `cd chapter4`
    * `lein run` for running all examples
    * for running only some examples use `lein repl`, and now
@@ -45,6 +45,18 @@ Some examples are typed down verbatim, some are changed slightly - everything wh
 
 ### Chapter 5
 
+   * Download files as noted in chapter5/data/README.md
+   * extract and put the downloaded data into chapter5/data
+   * `cd chapter5`
+   * `lein run` for running all examples
+   * for running only some examples use `lein repl`, and now
+       - `(def soi (chapter5.data/soi-data))` for loading data
+       - `(ex-5-xx soi)` to run an example
+       - `(use 'chapter5.examples :reload)` to reload examples.clj
+
+### Chapter 6
+
 ToDo
+
 
 
