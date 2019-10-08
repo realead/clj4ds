@@ -10,13 +10,20 @@
  ;              ex-5-2
  ;              ex-5-3
  ;              ex-5-4
-                ex-5-5
-                ex-5-6
+ ;              ex-5-5
+ ;              ex-5-6
+ ;              ex-5-7
+ ;              ex-5-8
+ ;              ex-5-9
               ]
 )
 
 (def examples-with-data [
- 
+ ;               ex-5-10
+                ex-5-11
+                ex-5-12
+                ex-5-13
+                ex-5-14
               ]
 )
 
@@ -31,12 +38,12 @@
       )
   )
 
-;  (let [data (titanic-data)]
-;      (doseq  [f examples-with-data] 
-;          (-> (f data)
-;              (pr-str)
-;              (println)
-;          )
-;      )
-;  )
+  (let [data (soi-data)]
+      (doseq  [f examples-with-data] 
+          (-> (f data)
+              (pr-str)
+              (println)
+          )
+      )
+  )
 )
