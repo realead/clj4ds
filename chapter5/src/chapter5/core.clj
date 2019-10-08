@@ -6,7 +6,12 @@
 
 
 (def examples [
-              
+ ;               ex-5-1
+ ;              ex-5-2
+ ;              ex-5-3
+ ;              ex-5-4
+                ex-5-5
+                ex-5-6
               ]
 )
 
@@ -26,12 +31,12 @@
       )
   )
 
-  (let [data (titanic-data)]
-      (doseq  [f examples-with-data] 
-          (-> (f data)
-              (pr-str)
-              (println)
-          )
-      )
-  )
+;  (let [data (titanic-data)]
+;      (doseq  [f examples-with-data] 
+;          (-> (f data)
+;              (pr-str)
+;              (println)
+;          )
+;      )
+;  )
 )
