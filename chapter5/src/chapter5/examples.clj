@@ -4,7 +4,9 @@
             [clojure.string :as str]
             [clojure.core.reducers :as r]
             [incanter.core :as i]
-            [iota]
+            [iota]            
+            [tesser.math :as m]
+            [tesser.core :as t]
   )
 )
 
@@ -221,6 +223,15 @@
   )
 )
 
+(defn ex-5-17
+  [data]
+  (let [data (into [] data)]
+       (->> (m/covariance :A02300 :A00200)
+            (t/tesser (t/chunk 512 data))
+       )
+  )
+)
 
+      
 
 
