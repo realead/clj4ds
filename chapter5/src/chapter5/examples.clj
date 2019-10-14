@@ -259,6 +259,72 @@
        )
   )
 )
-      
+   
+
+
+(defn ex-5-20
+  []
+  (let [data (iota/seq "data/soi.csv")]
+       (->> (prepare-data)
+            (t/map :A00200)
+            (t/fuse {:A00200-mean (m/mean)
+                     :A00200-sd (m/standard-deviation)})
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+(defn ex-5-21
+  []
+  (let [data (iota/seq "data/soi.csv")]
+       (->> (prepare-data)
+            (t/map #(select-keys % [:A00200 :A02300]))
+            (t/facet)
+            (m/mean)
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+(defn calculate-coefficients 
+  [{:keys [covariance variance-x mean-x mean-y]}]
+  (let [slope (/ covariance variance-x)
+        intercept (- mean-y (* mean-x slope))]
+       [intercept slope]
+  )
+)
+
+(defn ex-5-22
+  []
+  (let [data (iota/seq "data/soi.csv")
+        fx :A00200
+        fy :A02300]
+       (->> (prepare-data)
+            (t/fuse {:covariance (m/covariance fx fy)
+                     :variance-x (m/variance (t/map fx))
+                     :mean-x (m/mean (t/map fx))
+                     :mean-y (m/mean (t/map fy))
+                    })
+            (t/post-combine calculate-coefficients)
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+(defn ex-5-23
+  []
+  (let [data (iota/seq "data/soi.csv")
+        attributes {:unemp-compensation :A02300
+                    :salary             :A00200
+                    :gross-income       :AGI_STUB
+                    :joint-submission   :MARS2
+                    :dependents         :NUMDEP}]
+       (->> (prepare-data)
+            (m/correlation-matrix attributes)
+            (t/tesser (chunks data))
+       )
+  )
+)
+     
 
 
