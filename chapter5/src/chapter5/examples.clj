@@ -232,6 +232,33 @@
   )
 )
 
+(defn chunks
+  [coll]
+  (->> (into [] coll)
+       (t/chunk 1024)
+  )
+)
+
+(defn ex-5-18
+  []
+  (let [data (iota/seq "data/soi.csv")]
+       (->> (prepare-data)
+            (m/covariance :A02300 :A00200)
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+
+(defn ex-5-19
+  []
+  (let [data (iota/seq "data/soi.csv")]
+       (->> (prepare-data)
+            (m/correlation :A02300 :A00200)
+            (t/tesser (chunks data))
+       )
+  )
+)
       
 
 
