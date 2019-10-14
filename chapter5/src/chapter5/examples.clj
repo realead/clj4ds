@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.core.reducers :as r]
+            [incanter.core :as i]
             [iota]
   )
 )
@@ -168,6 +169,58 @@
        (mean-post-combiner)
   )
 )
+
+(defn ex-5-15
+  [data]
+  (let [data (r/map :N1 data)
+        mean-x (->> data
+                    (r/fold mean-combiner mean-reducer)
+                    (mean-post-combiner)
+               )
+        sq-diff (fn [x] (i/pow (- x mean-x) 2))
+       ]
+
+      (->> data
+           (r/map sq-diff)
+           (r/fold mean-combiner mean-reducer)
+           (mean-post-combiner)
+      )
+   )
+)
+
+(defn variance-combiner
+   ([] {:count 0 :sum 0 :sum2 0})
+   ([a b]
+    (let [count (+ (:count a) (:count b))
+          sum (+ (:sum a) (:sum b))
+          sum2 (+ (:sum2 a) (:sum2 b))]
+          {:count count :sum sum :sum2 sum}
+    )
+  )
+)
+
+(defn variance-reducer
+  [{:keys [count sum sum2]} x]
+  {:count (inc count) :sum (+ sum x) :sum2 (+ sum2 (i/pow x 2))}
+)
+
+
+(defn variance-post-combiner
+ [{:keys [count sum sum2]}]
+ (if (zero? count) 
+     0
+     (- (/ sum2 count) (i/pow (/ sum count)))
+ )
+)   
+
+(defn ex-5-16
+  [data]
+  (->> (r/map :N1 data)
+       (r/fold variance-combiner variance-reducer)
+       (variance-post-combiner)
+  )
+)
+
 
 
 

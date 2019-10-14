@@ -20,10 +20,12 @@
 
 (def examples-with-data [
  ;               ex-5-10
-                ex-5-11
-                ex-5-12
-                ex-5-13
-                ex-5-14
+ ;              ex-5-11
+ ;              ex-5-12
+ ;              ex-5-13
+ ;              ex-5-14
+                ex-5-15
+                ex-5-16
               ]
 )
 
