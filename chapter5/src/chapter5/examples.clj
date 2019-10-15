@@ -325,6 +325,68 @@
        )
   )
 )
-     
+
+(defn feature-scales 
+    [features]
+    (->> (prepare-data)
+         (t/map #(select-keys % features))
+         (t/facet)
+         (t/fuse {:mean (m/mean)
+                  :sd (m/standard-deviation)})
+    )
+)
+
+(defn ex-5-24
+  []
+  (let [data (iota/seq "data/soi.csv")
+        features [:A02300 :A00200 :AGI_STUB :MARS2 :NUMDEP]]
+       (->> (feature-scales features)
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+(defn scale-features 
+    [factors]
+    (let [f (fn [x {:keys [mean sd]}]
+                (/ (- x mean) sd)
+            )
+         ] 
+         (fn [x]
+           (merge-with f x factors)
+         )
+    )
+)
+
+(defn unscale-features 
+    [factors]
+    (let [f (fn [x {:keys [mean sd]}]
+                (+ (* x sd) mean)
+            )
+         ] 
+         (fn [x]
+           (merge-with f x factors)
+         )
+    )
+)
+
+
+(defn ex-5-25
+  []
+  (let [data (iota/seq "data/soi.csv")
+        features [:A02300 :A00200 :AGI_STUB :MARS2 :NUMDEP]
+        factors (->> (feature-scales features)
+                     (t/tesser (chunks data))
+                )
+       ]
+       (->> (soi-data)
+            (r/remove  #(zero? (:zipcode %)))
+            (r/map #(select-keys % features))
+            (r/map (scale-features factors))
+            (into [])
+            (first)
+       )
+  )
+)    
 
 
