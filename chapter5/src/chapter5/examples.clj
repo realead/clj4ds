@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [clojure.core.reducers :as r]
             [incanter.core :as i]
+            [incanter.charts :as c]
             [iota]            
             [tesser.math :as m]
             [tesser.core :as t]
@@ -388,5 +389,234 @@
        )
   )
 )    
+
+(defn feature-matrix 
+   [record features]
+   (let [xs (map #(% record) features)]
+        (i/matrix (cons 1 xs))
+   )
+)
+
+(defn extract-features
+   [fy features]
+   (fn [record]
+       {:y (fy record)
+        :xs (feature-matrix record features)
+       }
+   )
+)
+
+(defn ex-5-26
+  []
+  (let [data (iota/seq "data/soi.csv")
+        features [:A02300 :A00200 :AGI_STUB :MARS2 :NUMDEP]
+        factors (->> (feature-scales features)
+                     (t/tesser (chunks data))
+                )
+       ]
+       (->> (soi-data)
+            (r/remove  #(zero? (:zipcode %)))
+            ;(r/map #(select-keys % features))
+            (r/map (scale-features factors))
+            (r/map (extract-features :A02300 features))
+            (into [])
+            (first)
+       )
+  )
+)
+
+(defn matrix-sum
+  [nrows ncols]
+  (let [zeros-matrix (i/matrix 0 nrows ncols)]
+    {:reducer-identity (constantly zeros-matrix)
+     :reducer i/plus
+     :combiner-identity (constantly zeros-matrix)
+     :combiner i/plus
+    }
+  )
+)
+
+(defn ex-5-27
+  []
+  (let [columns [:A02300 :A00200 :AGI_STUB :MARS2 :NUMDEP]
+        data (iota/seq "data/soi.csv")
+       ]
+       (->> (prepare-data)
+            (t/map (extract-features :A02300 columns))
+            (t/map :xs)
+            (t/fold (matrix-sum (inc (count columns)) 1))
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+(defn calculate-error
+  [coefs-t]
+  (fn [{:keys [y xs]}]
+      (let [y-hat (first (i/mmult coefs-t xs))
+            error (- y-hat y)]
+           (i/mult xs error)
+      )
+   )
+)
+
+(defn ex-5-28
+  []
+  (let [columns [:A02300 :A00200 :AGI_STUB :MARS2 :NUMDEP]
+        fcount (inc (count columns))
+        coefs (vec (repeat fcount 0))
+        data (iota/seq "data/soi.csv")
+       ]
+       (->> (prepare-data)
+            (t/map  (extract-features :A02300 columns))
+            (t/map  (calculate-error (i/trans coefs)))
+            (t/fold (matrix-sum fcount 1))
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+
+(defn ex-5-29
+  []
+  (let [columns [:A00200 :AGI_STUB :MARS2 :NUMDEP]
+        fcount (inc (count columns))
+        coefs (vec (repeat fcount 0))
+        data (iota/seq "data/soi.csv")
+       ]
+       (->> (prepare-data)
+            (t/map  (extract-features :A02300 columns))
+            (t/map  (calculate-error (i/trans coefs)))
+            (t/fuse {:sum (t/fold (matrix-sum fcount 1))
+                     :count (t/count)}
+            )
+            (t/post-combine (fn [{:keys [sum count]}]
+                                 (i/div sum count)
+                            )
+            )
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+(defn matrix-mean
+  [nrows ncols]
+  (let [zeros-matrix (i/matrix 0 nrows ncols)]
+    {:reducer-identity (constantly {:sum zeros-matrix
+                                    :count 0})
+     :reducer (fn [{:keys [sum count]} x]
+                  {:sum (i/plus sum x) :count (inc count)}
+              )
+     :combiner-identity (constantly {:sum zeros-matrix
+                                     :count 0})
+     :combiner (fn [a b]
+                  (merge-with i/plus a b)
+               )
+     :post-combiner (fn [{:keys [sum count]}]
+                  (i/div sum count)
+              )
+    }
+  )
+)
+  
+
+(defn ex-5-30
+  []
+  (let [columns [:A00200 :AGI_STUB :MARS2 :NUMDEP]
+        fcount (inc (count columns))
+        coefs (vec (repeat fcount 0))
+        data (iota/seq "data/soi.csv")
+       ]
+       (->> (prepare-data)
+            (t/map  (extract-features :A02300 columns))
+            (t/map  (calculate-error (i/trans coefs)))
+            (t/fold (matrix-mean fcount 1))
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+(defn update-coefficients 
+   [coefs alpha]
+   (fn [cost]
+       (->> (i/mult cost alpha)
+            (i/minus coefs)
+       )
+   )
+)
+
+(defn gradient-descent-fold
+  [{:keys [fy features factors 
+               coefs alpha]}]
+  (let [zeros-matrix (i/matrix 0 (count features) 1)]
+       (->> (prepare-data)
+            (t/map  (scale-features factors))
+            (t/map  (extract-features fy features))
+            (t/map  (calculate-error (i/trans coefs)))
+            (t/fold (matrix-mean (inc (count features)) 1))
+            (t/post-combine (update-coefficients coefs alpha))
+       )
+  )
+)
+
+(defn ex-5-31
+  []
+  (let [features [:A00200 :AGI_STUB :MARS2 :NUMDEP]
+        fcount (inc (count features))
+        coefs (vec (repeat fcount 0))
+        data (iota/seq "data/soi.csv")
+        factors (->> (feature-scales features)
+                     (t/tesser (chunks data))
+                )
+        options {:fy :A02300 :features features :factors factors
+                 :coefs coefs :alpha 0.1}
+       ]
+       (->> (gradient-descent-fold options)
+            (t/tesser (chunks data))
+       )
+  )
+)
+
+
+(defn descend
+   [options data]
+   (fn [coefs] 
+       (->> (gradient-descent-fold (assoc options :coefs coefs))
+            (t/tesser (chunks data))
+       )
+   )
+)
+
+(defn ex-5-32
+  []
+  (let [features [:A00200 :AGI_STUB :MARS2 :NUMDEP]
+        fcount (inc (count features))
+        coefs (vec (repeat fcount 0))
+        data (iota/seq "data/soi-sample.csv")
+        factors (->> (feature-scales features)
+                     (t/tesser (chunks data))
+                )
+        options {:fy :A02300 :features features :factors factors
+                 :coefs coefs :alpha 0.1}
+        iterations 100
+        xs (range iterations)
+        ys (->> (iterate (descend options data) coefs)
+                (take iterations)
+           )
+       ]
+       (println (into [](map second ys)))
+       (-> (c/xy-plot xs (map first ys)
+                      :x-label "Iterations"
+                      :y-label "Coeff"
+           )
+           (c/add-lines xs (map second ys))
+           (c/add-lines xs (map #(nth % 2) ys))
+           (c/add-lines xs (map #(nth % 3) ys))
+           (c/add-lines xs (map #(nth % 4) ys))
+           (i/view)
+       )
+  )
+)
+
 
 
