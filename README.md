@@ -1,4 +1,4 @@
-# clj2ds
+# clj4ds
 
 Me working through Henry Garner's "Clojure for data sience".
 
@@ -48,7 +48,7 @@ Some examples are typed down verbatim, some are changed slightly - everything wh
    * Download files as noted in chapter5/data/README.md
    * extract and put the downloaded data into chapter5/data
    * `cd chapter5`
-   * `lein run` for running all examples
+   * `lein run` for running all examples (but activate them first in core.clj - it takes a lot of time to run)
    * for running only some examples use `lein repl`, and now
        - `(def soi (chapter5.data/soi-data))` for loading data
        - `(ex-5-xx soi)` to run an example

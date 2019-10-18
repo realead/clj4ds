@@ -647,7 +647,90 @@
      (h/fold conf input workdir #'feature-scales features)
   )
 )
+
+(defn hadoop-gradient-descent 
+   [conf input-file workdir]
+   (let [features [:A00200 :AGI_STUB :MARS2 :NUMDEP]
+         fcount (inc (count features))
+         coefs (vec (repeat fcount 0))
+         input (text/dseq input-file)
+         options {:features features 
+                  :dy :A02300 
+                  :coefs coefs 
+                  :alpha 0.1}
+         
+         factors (h/fold conf input (rand-file workdir)
+                         #'feature-scales
+                         features
+                 )
+         descend (fn [coefs] 
+                   (h/fold conf input (rand-file workdir)
+                           #'gradient-descent-fold
+                           (merge options {:coefs coefs
+                                           :factors factors}
+                           )
+                   )
+                  )
+        ]
+       (take 5 (iterate descend coefs))
+   )
+)
+
+
+;(defn ex-5-35
+;  []
+;  (let [conf (conf/ig)
+;        workdir "tmp"
+;       ]
+;     (hadoop-gradient-descent  conf "data/soi.csv" workdir)
+;  )
+;)
    
+
+
+(defn stohastic-gradient-descent
+   [options data]
+   (let [batches (->> (into [] data)
+                      (shuffle)
+                      (partition 250)
+                 )
+        descend (fn [coefs batch]
+                    (->> (gradient-descent-fold (assoc options :coefs coefs))
+                         (t/tesser (chunks batch))
+                    )
+                )
+        ]
+        (reductions  descend (:coefs options) batches)
+   )
+)
+
+(defn ex-5-36
+  []
+  (let [features [:A00200 :AGI_STUB :MARS2 :NUMDEP]
+        fcount (inc (count features))
+        coefs (vec (repeat fcount 0))
+        data (iota/seq "data/soi.csv")
+        factors (->> (feature-scales features)
+                     (t/tesser (chunks data))
+                )
+        options {:fy :A02300 :features features :factors factors
+                 :coefs coefs :alpha 0.001}
+        ys (stohastic-gradient-descent options data)
+        xs (range (count ys))
+       ]
+       (println (into [](map second ys)))
+       (-> (c/xy-plot xs (map first ys)
+                      :x-label "Iterations"
+                      :y-label "Coeff"
+           )
+           (c/add-lines xs (map second ys))
+           (c/add-lines xs (map #(nth % 2) ys))
+           (c/add-lines xs (map #(nth % 3) ys))
+           (c/add-lines xs (map #(nth % 4) ys))
+           (i/view)
+       )
+  )
+)
 
 
 
