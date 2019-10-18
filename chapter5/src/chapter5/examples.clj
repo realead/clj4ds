@@ -1,14 +1,21 @@
 (ns chapter5.examples
   (:require [chapter5.data :refer :all]
+
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.core.reducers :as r]
+
             [incanter.core :as i]
             [incanter.charts :as c]
-            [iota]            
+
+            [iota]     
+       
             [tesser.math :as m]
             [tesser.core :as t]
+            [tesser.hadoop :as h]
+
             [parkour.io.text :as text]
+            [parkour.conf :as conf]
   )
 )
 
@@ -628,6 +635,19 @@
        (into [])
   )
 )
+
+
+(defn ex-5-34
+  []
+  (let [conf (conf/ig)
+        input (text/dseq "data/soi.csv")
+        workdir (rand-file "tmp")
+        features [:A00200 :AGI_STUB :MARS2 :NUMDEP]
+       ]
+     (h/fold conf input workdir #'feature-scales features)
+  )
+)
+   
 
 
 

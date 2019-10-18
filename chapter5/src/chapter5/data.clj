@@ -65,3 +65,7 @@
 )
 
 
+(defn rand-file [path]
+      (io/file path (str (long (rand 0x10000000000))))
+)
+
