@@ -8,6 +8,7 @@
             [iota]            
             [tesser.math :as m]
             [tesser.core :as t]
+            [parkour.io.text :as text]
   )
 )
 
@@ -615,6 +616,16 @@
            (c/add-lines xs (map #(nth % 4) ys))
            (i/view)
        )
+  )
+)
+
+
+
+(defn ex-5-33
+  []
+  (->> (text/dseq "data/soi.csv")
+       (r/take 2)
+       (into [])
   )
 )
 
